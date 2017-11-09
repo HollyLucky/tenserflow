@@ -157,5 +157,37 @@ import tensorflow as tf
 #         end=min(start+batch_size,data_size)
 #         sess.run(train_step,feed_dict={x:X[start:end],y_:Y[start:end]})
 #     print(sess.run(w1))
+# global_step=tf.Variable(0)
+# #通过exponential_decay函数生成学习率
+# learning_rate=tf.train.exponential_decay(0.1,global_step,100,0.96,staircase=True)
+# #使用指数衰减的学习率。在minimize函数中传入global_step将自动更新,global_step参数，从而使得学习率也得到相应更新
+# learning_step=tf.train.GradientDescentOptimizer(learning_rate).minimize(loss,global_step=global_step)
+# w=tf.constant(tf.random_normal([2,1],stddev=1,seed=1))
+# y=tf.matmul(x,w)
+# loss=tf.reduce_mean(tf.square(y_-y))+tf.contrib.layers.12_regularizer(lambda)(w)
+# weights=tf.constant([[1.0,-2.0],[-3.0,4.0]])
+# with tf.Session() as sess:
+#     print(sess.run(tf.contrib.layers.l1_regularizer(.5)(weights)))
+#     print(sess.run(tf.contrib.layers.l2_regularizer(.5)(weights)))
+# def get_weight(shape,lambdal):
+#     var=tf.Variable(tf.random_normal(shape),dtype=tf.float32)
+#     tf.add_to_collection('losses',tf.contrib.layers.l2_regularizer(lambdal)(var))
+#     return var
+# x=tf.placeholder(tf.float32,shape=(None,2))
+# y_=tf.placeholder(tf.float32,shape=(None,1))
+# batch_size=8
+# layer_dimension=[2,10,10,10,2]
+# n_layers=len(layer_dimension)
+# cur_layer=x
+# in_dimension=layer_dimension[0]
+# for i in range(1,n_layers):
+#     out_dimension=layer_dimension[i]
+#     weight=get_weight([in_dimension,out_dimension],0.001)
+#     bias=tf.Variable(tf.constant(0.1,shape=[out_dimension]))
+#     cur_layer=tf.nn.relu(tf.matmul(cur_layer,weight)+bias)
+#     in_dimension=layer_dimension[i]
+# mse_loss=tf.reduce_mean(tf.square(y_-cur_layer))
+# tf.add_to_collection('losses',mse_loss)
+# loss=tf.add_n(tf.get_collection('losses'))
 
 
