@@ -108,13 +108,31 @@ def train(mnist):
     #每1000轮输出依次在验证数据集上的测试结果
             if i % 1000==0:
                 validate_acc=sess.run(accuracy,feed_dict=validate_feed)
-                print("After %d training step(s), validation accuracy using average model is %g" %(i,validate_acc))
+                test_acc=sess.run(accuracy,feed_dict=test_feed)
+                print("After %d training step(s), validation accuracy using average model is %g,test accuracy using average model is %g" %(i,validate_acc,test_acc))
         #产生这一轮使用的一个batch的训练数据，并运行训练过程
             xs,ys=mnist.train.next_batch(BATCH_SIZE)
             sess.run(train_op,feed_dict={x:xs,y_:ys})
     #在训练结束之后，在测试数据上检测神经网络模型的最终正确率
         test_acc=sess.run(accuracy,feed_dict=test_feed)
         print("After %d training step(s),test accuracy using average model is %g" %(TRAINING_STEPS,test_acc))
+
+def inference(input_tensor, reuse=False):
+    # 定义第一层神经网络的变量和前向传播过程。
+    with tf.variable_scope('layer1', reuse=reuse):
+        # 根据传进来的reuse来判断是创建新变量还是使用已经创建好的。在第一次构造网络时需要创建新的变量，以后每次调用这个函数都直接使用reuse=True
+        # 就不需要每次将变量传进来
+        weights = tf.get_variable("weights", [INPUT_NODE,LAYER1_NODE],initializer=tf.truncated_normal_initializer(stddev=0.1))
+        biases=tf.get_variable("biases",[LAYER1_NODE],initializer=tf.constant_initializer(0.0))
+        layer1=tf.nn.relu(tf.matmul(input_tensor,weights)+biases)
+    #类似地定义第二层神经网络的变量和前向传播过程
+    with tf.variable_scope("layer2",reuse=reuse):
+        weights=tf.get_variable("weights",[LAYER1_NODE,OUTPUT_NODE],initializer=tf.truncated_normal_initializer(stddev=0.1))
+        biases=tf.get_variable("biases",[OUTPUT_NODE],initializer=tf.constant_initializer(0.0))
+        layer2=tf.nn.relu(tf.matmul(layer1,weights)+biases)
+    return layer2
+x=tf.placeholder(tf.float32,[None,INPUT_NODE],name='x-input')
+y=inference(x)
 #主程序入口
 def main(argv=None):
     #声明处理MNIST数据集的类，这个类在初始化时会自动下载数据
